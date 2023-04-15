@@ -1,3 +1,6 @@
+import io.qameta.allure.junit4.DisplayName;
+import org.example.api.ApiMethods;
+import org.example.api.CreateUserPojo;
 import org.example.pageobject.*;
 import org.example.random.RandomGenerator;
 import org.junit.After;
@@ -16,101 +19,84 @@ public class LoginTest {
     private HeaderPage headerPage;
     private String random;
     private ForgotPassPage forgotPassPage;
+    private ApiMethods apiMethods;
+    private String token;
 
 
     @Before
     public void setUp() {
         random = RandomGenerator.getRandom();
+        apiMethods = new ApiMethods();
+//        System.setProperty("webdriver.chrome.driver", "yandexdriver.exe");
     }
 
     @After
     public void tearDown() {
         driver.quit();
+        apiMethods.deleteUser(token);
     }
 
     @Test
+    @DisplayName("Авторизация со страницы Конструктор")
     public void canLoginFromConstruktorPage() {
+        CreateUserPojo createUserJson = new CreateUserPojo(random + "@ya.ru", random, random);
         driver = new ChromeDriver();
-        driver.get("https://stellarburgers.nomoreparties.site/register");
-
-        registrationPage = new RegistrationPage(driver);
+        driver.get("https://stellarburgers.nomoreparties.site/");
         loginPage = new LoginPage(driver);
         construktorPage = new ConstruktorPage(driver);
-        headerPage = new HeaderPage(driver);
 
-        registrationPage.registrationStep(random, random + "@ya.ru", random);
-        loginPage.waitOpenLoginPage();
-        headerPage.clickMainLogo();
-        construktorPage.waitOpenConstruktorPage();
-        headerPage.clickAccountButton();
-        loginPage.waitOpenLoginPage();
-        loginPage.loginStep(random + "@ya.ru", random);
-        construktorPage.waitOpenConstruktorPage();
+        token = apiMethods.createUser(createUserJson);
+        construktorPage.clickLoginButton();
+        loginPage.loginStep(createUserJson.getEmail(), createUserJson.getPassword());
         Assert.assertTrue(construktorPage.isCreateOrderButtonVisible());
     }
 
     @Test
-    public void canLoginFromAccountPage() throws InterruptedException {
+    @DisplayName("Авторизация из шапки сайта")
+    public void canLoginFromHeaderPage() {
+        CreateUserPojo createUserJson = new CreateUserPojo (random + "@ya.ru", random, random);
         driver = new ChromeDriver();
-        driver.get("https://stellarburgers.nomoreparties.site/register");
-
-        registrationPage = new RegistrationPage(driver);
+        driver.get("https://stellarburgers.nomoreparties.site");
         loginPage = new LoginPage(driver);
         construktorPage = new ConstruktorPage(driver);
         headerPage = new HeaderPage(driver);
 
-        registrationPage.registrationStep(random, random + "@ya.ru", random);
-        loginPage.waitOpenLoginPage();
-        headerPage.clickMainLogo();
-        construktorPage.waitOpenConstruktorPage();
-        headerPage.clickAccountButton();
-        loginPage.waitOpenLoginPage();
-        loginPage.loginStep(random + "@ya.ru", random);
-        construktorPage.waitOpenConstruktorPage();
+        token = apiMethods.createUser(createUserJson);
+        headerPage.clickEnterPersonalAccountButton();
+        loginPage.loginStep(createUserJson.getEmail(), createUserJson.getPassword());
         Assert.assertTrue(construktorPage.isCreateOrderButtonVisible());
     }
 
     @Test
+    @DisplayName("Авторизация со страницы регистрации")
     public void canLoginFromRegistrationPage() {
+        CreateUserPojo createUserJson = new CreateUserPojo (random + "@ya.ru", random, random);
         driver = new ChromeDriver();
         driver.get("https://stellarburgers.nomoreparties.site/register");
-
         registrationPage = new RegistrationPage(driver);
         loginPage = new LoginPage(driver);
         construktorPage = new ConstruktorPage(driver);
         headerPage = new HeaderPage(driver);
 
-        registrationPage.registrationStep(random, random + "@ya.ru", random);
-        loginPage.waitRegistrationButton();
-        loginPage.clickRegistrationButton();
-        registrationPage.waitOpenRegistrationPage();
+        token = apiMethods.createUser(createUserJson);
         registrationPage.clickLoginButton();
-        loginPage.waitOpenLoginPage();
-        loginPage.loginStep(random + "@ya.ru", random);
-        construktorPage.waitOpenConstruktorPage();
+        loginPage.loginStep(createUserJson.getEmail(), createUserJson.getPassword());
         Assert.assertTrue(construktorPage.isCreateOrderButtonVisible());
     }
 
     @Test
+    @DisplayName("Авторизация со страницы Восстановления пароля")
     public void canLoginFromForgotPassPage() {
+        CreateUserPojo createUserJson = new CreateUserPojo (random + "@ya.ru", random, random);
         driver = new ChromeDriver();
-        driver.get("https://stellarburgers.nomoreparties.site/register");
-
-        registrationPage = new RegistrationPage(driver);
+        driver.get("https://stellarburgers.nomoreparties.site/forgot-password");
         loginPage = new LoginPage(driver);
         forgotPassPage = new ForgotPassPage(driver);
         construktorPage = new ConstruktorPage(driver);
 
-        registrationPage.registrationStep(random, random + "@ya.ru", random);
-        loginPage.waitForgotPassButton();
-        loginPage.clickForgotPassButton();
-        forgotPassPage.waitLoginButton();
+        token = apiMethods.createUser(createUserJson);
         forgotPassPage.clickLoginButton();
-        loginPage.waitOpenLoginPage();
-        loginPage.loginStep(random + "@ya.ru", random);
-        construktorPage.waitOpenConstruktorPage();
+        loginPage.loginStep(createUserJson.getEmail(), createUserJson.getPassword());
         Assert.assertTrue(construktorPage.isCreateOrderButtonVisible());
     }
-
-
 }

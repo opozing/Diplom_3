@@ -3,8 +3,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
 import java.time.Duration;
+
 
 public class RegistrationPage {
     private WebDriver driver;
@@ -43,16 +43,12 @@ public class RegistrationPage {
     }
 
     public boolean isPasswordErrorVisible() {
-        return driver.findElement(passwordError).isDisplayed();
-    }
-
-    public void waitOpenRegistrationPage() {
         new WebDriverWait(driver, Duration.ofSeconds(3))
-                .until(ExpectedConditions.elementToBeClickable(emailForm));
+                .until(ExpectedConditions.elementToBeClickable(passwordError));
+        return driver.findElement(passwordError).isDisplayed();
     }
 
     public void clickLoginButton() {
         driver.findElement(loginButton).click();
     }
-
 }
